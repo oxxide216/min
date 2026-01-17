@@ -1,0 +1,71 @@
+(use 'std/str')
+
+(use 'config')
+
+(let messages [])
+(let last-message-id 0)
+
+(let parse-message [raw-message] ->
+  (if (< (len raw-message) 1)
+    (ret unit))
+  (let sender-len raw-message::0)
+
+  (if (< (len raw-message) (+ 2 sender-len))
+    (ret unit))
+  (let sender (get-range raw-message 1 (+ 1 sender-len)))
+
+  (let text-len raw-message::(+ 1 sender-len))
+
+  (if (< (len raw-message) (+ 2 (+ sender-len text-len)))
+    (ret unit))
+  (let text (get-range raw-message
+                       (+ 2 sender-len)
+                       (+ 2 (+ sender-len text-len))))
+
+  {
+    'sender': sender
+    'text': text
+  })
+
+(let send-message-handler [parsed-request] ->
+  (if (!= parsed-request::'method' 'POST')
+    (ret 'Wrong method, expected POST\n'))
+
+  (let raw-message (if (bytes? parsed-request::'content')
+                     parsed-request::'content'
+                    else
+                     (to-bytes parsed-request::'content')))
+
+  (let message (parse-message raw-message))
+  (if (unit? message)
+    (ret 'Wrong message format\n'))
+
+  (set last-message-id (+ last-message-id 1))
+  (set message::'id' last-message-id)
+
+  (set messages (+ messages message))
+  (if (> (len messages) MAX-MESSAGES-COUNT)
+    (let delta (- (len messages) MAX-MESSAGES-COUNT))
+    (set messages (get-range messages delta (len messages))))
+
+  'Success\n')
+
+(let poll-messages-handler [parsed-request] ->
+  (if (!= parsed-request::'method' 'POST')
+    (ret 'Wrong method, expected POST\n'))
+
+  (let prev-message-id (to-int (to-str parsed-request::'content')))
+  (if (unit? prev-message-id)
+    (ret 'Wrong content, expected message id\n'))
+
+  (let actual-messages (filter
+                         [message] ->
+                           (> message::'id' prev-message-id) <>
+                         messages))
+
+  (let message-texts (map
+                       [message] ->
+                         (join [message::'sender' message::'text'] ': ') <>
+                       actual-messages))
+
+  (join message-texts '\n'))

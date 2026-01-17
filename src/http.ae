@@ -1,0 +1,77 @@
+(use 'std/log')
+(use 'std/io')
+
+(use 'routes')
+
+(let parse-request [request] ->
+  (let delimeter-index (get-index request (to-bytes '\r\n\r\n')))
+  (if (unit? delimeter-index)
+    (set delimeter-index (len request)))
+
+  (let header-bytes (get-range request 0 delimeter-index))
+  (let content-bytes (get-range request (+ delimeter-index 4) (len request)))
+
+  (let header-lines (split (to-str header-bytes) '\r\n'))
+  (if (== (len header-lines) 0)
+    (ret { 'error': 'Corrupted HTTP request: no headers' }))
+
+  (let start-line-parts (split header-lines::0 ' '))
+  (if (!= (len start-line-parts) 3)
+    (ret { 'error': 'Corrupted HTTP request: unknown start line format' }))
+
+  (let headers (atom {}))
+  (for line in header-lines
+    (let parts (split line ': '))
+    (if (== (len parts) 2)
+      (let key parts::0)
+      (set headers::key parts::1)))
+
+  {
+    'method': start-line-parts::0
+    'path': start-line-parts::1
+    'headers': headers
+    'content': content-bytes
+  })
+
+(let build-response [code message type content] ->
+  (join
+    ['HTTP/1.1 ' code ' ' message '\r\n'
+     'Content-Type: ' type '; charset=utf-8\r\n'
+     'Content-Length: ' (to-str (len-bytes content)) '\r\n'
+     '\r\n'
+     content]
+    ''))
+
+(let build-fallback-response [] ->
+  (build-response fallback-route::'code' fallback-route::'message'
+                  fallback-route::'type' (fallback-route::'handler' unit)))
+
+(let log-request-route [request route] ->
+  (info 'Request ' request::'method' ' ' request::'path' ' '
+        route::'code' ' ' route::'message'))
+
+(let process-request [request] ->
+  (if (unit? request)
+    (ret (build-fallback-response)))
+
+  (let parsed (parse-request request))
+
+  (let matched-routes
+    (filter [route] -> (== route::'path' parsed::'path') <>
+            routes))
+
+  (if (== (len matched-routes) 0)
+    (if DEBUG
+      (log-request-route parsed fallback-route))
+    (ret (build-fallback-response)))
+
+  (let route matched-routes::0)
+  (if DEBUG
+    (log-request-route parsed route))
+
+  (let content (route::'handler' parsed))
+  (if (unit? content)
+    (build-fallback-response)
+   else
+    (build-response route::'code' route::'message'
+                    route::'type' content)))

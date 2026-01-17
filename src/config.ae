@@ -1,0 +1,3 @@
+(let PORT 8080)
+(let DEBUG true)
+(let MAX-MESSAGES-COUNT 1000)

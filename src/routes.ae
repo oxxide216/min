@@ -1,0 +1,65 @@
+(use 'std/log')
+(use 'std/io')
+
+(use 'min')
+
+(let get-content-ensure-exists [file-path is-bin] ->
+  (let content (if is-bin (read-binary-file file-path)
+                else      (read-file file-path)))
+  (if (unit? content)
+    (error (+ file-path ' file was not found')))
+  content)
+
+(let static-handler [content] ->
+  [parsed-request] -> content)
+
+(let reload-handler [file-path is-bin] ->
+  [parsed-request] -> (get-content-ensure-exists file-path is-bin))
+
+(let static-route [path code message type file-path is-bin] ->
+  (let handler (if DEBUG (reload-handler file-path is-bin)
+                else     (static-handler (get-content-ensure-exists file-path is-bin))))
+
+  {
+    'path': path
+    'code': code
+    'message': message
+    'type': type
+    'handler': handler
+  })
+
+(let const-route [path code message type content] ->
+  {
+    'path': path
+    'code': code
+    'message': message
+    'type': type
+    'handler': [parsed-request] -> content <>
+  })
+
+(let api-route [path code message type handler] ->
+  {
+    'path': path
+    'code': code
+    'message': message
+    'type': type
+    'handler': handler
+  })
+
+(let routes [(static-route '/' '200' 'OK' 'text/html' 'static/index.html' false)
+             (static-route '/chat' '200' 'OK' 'text/html' 'static/chat.html' false)
+             (static-route '/colors.css' '200' 'OK' 'text/css' 'static/colors.css' false)
+             (static-route '/index.css' '200' 'OK' 'text/css' 'static/index.css' false)
+             (static-route '/chat.css' '200' 'OK' 'text/css' 'static/chat.css' false)
+             (static-route '/logo.png' '200' 'OK' 'image/png' 'static/assets/logo.png' true)
+             (static-route '/send-message-icon-dark.png' '200' 'OK' 'image/png'
+                           'static/assets/send-message-icon-dark.png' true)
+             (static-route '/left-arrow-icon-dark.png' '200' 'OK' 'image/png'
+                           'static/assets/left-arrow-icon-dark.png' true)
+             (static-route '/index.js' '200' 'OK' 'application/javascript' 'js/index.js' false)
+             (static-route '/url.js' '200' 'OK' 'application/javascript' 'js/url.js' false)
+             (static-route '/chat.js' '200' 'OK' 'application/javascript' 'js/chat.js' false)
+             (api-route '/min/api/send-message' '200' 'OK' 'text/plain' send-message-handler)
+             (api-route '/min/api/poll-messages' '200' 'OK' 'text/plain' poll-messages-handler)])
+
+(let fallback-route (const-route '' '404' 'Not found' 'text/plain' 'Not found'))

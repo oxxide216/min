@@ -1,0 +1,20 @@
+(use 'std/net')
+
+(use 'config')
+(use 'http')
+
+(let server (create-server PORT))
+(let clients (atom []))
+
+(while true
+  (let new-client (accept-connection server PORT))
+  (if new-client
+    (set clients (+ clients new-client)))
+
+  (for client in clients
+    (let request (receive client))
+    (if request
+      (let response (process-request request))
+      (send client response)))
+
+  (sleep 0.001))
