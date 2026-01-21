@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,
+                          initial-scale=1.0,
+                          interactive-widget=resize-content">
+
+    <title>Min messenger</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Roboto+Mono:ital,wght@0,100..700;1,100..700&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:," >
+    <link rel="stylesheet" type="text/css" href="colors.css"></link>
+    <link rel="stylesheet" type="text/css" href="chat.css"></link>
+  </head>
+  <body>
+    <div class="top-bar">
+      <div class="nav-buttons">
+        <button class="to-chats-button"
+                onclick="location.href='/chats'"></button>
+      </div>
+        <p class="chat-name"></p>
+    </div>
+
+    <div class="main-container">
+      <div class="messages-wrapper">
+        <span class="message owned-message" style="display: none">
+          Uwuned message
+        </span>
+
+        <span class="message non-owned-message" style="display: none">
+          Alien message
+        </span>
+      </div>
+
+      <div class="message-input-wrapper">
+        <input class="message-input" onsubmit="sendMessage()"></input>
+        <button class="send-message-button" onclick="sendMessage()"></button>
+      </div>
+    </div>
+
+    <script src="url.js"></script>
+    <script src="chat.js"></script>
+  </body>
+</html>

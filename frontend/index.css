@@ -1,0 +1,145 @@
+:root {
+  --form-width: 400px;
+  --form-item-width: 300px;
+  --form-item-margin: 28px;
+  --form-item-height: 50px;
+  --log-reg-switch-height: 30px;
+  --login-form-height: calc(var(--form-item-height) * 3 +
+                            var(--form-item-margin) * 4 +
+                            var(--log-reg-switch-height));
+  --reg-form-height: calc(var(--form-item-height) * 4 +
+                          var(--form-item-margin) * 5 +
+                          var(--log-reg-switch-height));
+}
+
+@media (pointer:none), (pointer:coarse) {
+  :root {
+    --form-width: 80vw;
+    --form-item-width: 70vw;
+  }
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--fg);
+  margin: 0;;
+  font-family: "Roboto Mono", monospace;
+}
+
+.form {
+  position: absolute;
+  left: calc(50% - var(--form-width) / 2);
+  width: var(--form-width);
+  background-color: var(--bg-alt);
+  border-radius: 20px;
+}
+
+.login-form {
+  top: calc(50% - var(--login-form-height) / 2);
+  height: var(--login-form-height);
+}
+
+.reg-form {
+  top: calc(50% - var(--reg-form-height) / 2);
+  height: var(--reg-form-height);
+}
+
+.log-reg-switch {
+  width: 100%;
+  height: var(--log-reg-switch-height);
+  background-color: var(--bg);
+  #border: 2px solid var(--accent);
+  border-radius: 20px;
+  display: flex;
+}
+
+.log-reg-switch button {
+  width: 49.675%;
+  height: var(--log-reg-switch-height);
+  background-color: var(--accent);
+  color: var(--bg-alt);
+  border: 2px solid var(--accent);
+  outline: none;
+}
+
+.log-reg-log {
+  border-radius: 20px 0 0 20px;
+}
+
+.log-reg-reg {
+  border-radius: 0 20px 20px 0;
+}
+
+.log-reg-switch button:hover {
+  background-color: var(--accent-dark);
+  border: 2px solid var(--accent-dark);
+}
+
+.log-reg-switch button:active {
+  background-color: var(--accent-darker);
+  border: 2px solid var(--accent-darker);
+}
+
+.log-reg-switch div {
+  width: 0.65%;
+  background-color: var(--accent);
+}
+
+.form-inner {
+  position: absolute;
+  left: calc(50% - var(--form-item-width) / 2);
+  top: calc(var(--log-reg-switch-height) + var(--form-item-margin));
+  width: var(--form-item-width);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-form .form-inner {
+  height: calc(var(--login-form-height) -
+               var(--log-reg-switch-height) -
+               var(--form-item-margin));
+}
+
+.reg-form .form-inner {
+  height: calc(var(--reg-form-height) -
+               var(--log-reg-switch-height) -
+               var(--form-item-margin));
+}
+
+.form-input {
+  width: calc(100% - 12px);
+  height: var(--form-item-height);
+  padding-left: 6px;
+  padding-right: -6px;
+  margin-bottom: var(--form-item-margin);
+  background-color: var(--bg);
+  color: var(--fg);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  outline: none;
+  font-size: 20px;
+}
+
+.form-button {
+  width: 100%;
+  height: var(--form-item-height);
+  margin-bottom: var(--form-item-margin);
+  background-color: var(--accent);
+  color: var(--bg-alt);
+  border: 2px solid var(--accent);
+  border-radius: 20px;
+  outline: 1px;
+  font-size: 20px;
+}
+
+.form-button:hover {
+  background-color: var(--accent-dark);
+  border: 2px solid var(--accent-dark);
+}
+
+.form-button:active {
+  background-color: var(--accent-darker);
+  border: 2px solid var(--accent-darker);
+}
