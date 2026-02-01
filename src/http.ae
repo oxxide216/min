@@ -3,7 +3,7 @@
 
 (use 'routes')
 
-(let parse-request [request] ->
+(let parse-request \request ->
   (let delimeter-index (get-index request (to-bytes '\r\n\r\n')))
   (if (unit? delimeter-index)
     (set delimeter-index (len request)))
@@ -19,12 +19,12 @@
   (if (!= (len start-line-parts) 3)
     (ret { 'error': 'Corrupted HTTP request: unknown start line format' }))
 
-  (let headers (atom {}))
+  (let headers {})
   (for line in header-lines
     (let parts (split line ': '))
     (if (== (len parts) 2)
       (let key parts::0)
-      (set headers::key parts::1)))
+      (set! headers key parts::1)))
 
   {
     'method': start-line-parts::0
@@ -33,7 +33,7 @@
     'content': content-bytes
   })
 
-(let build-response [code message type content] ->
+(let build-response \code message type content ->
   (join
     ['HTTP/1.1 ' code ' ' message '\r\n'
      'Content-Type: ' type '; charset=utf-8\r\n'
@@ -42,22 +42,22 @@
      content]
     ''))
 
-(let build-fallback-response [] ->
+(let build-fallback-response \->
   (build-response fallback-route::'code' fallback-route::'message'
                   fallback-route::'type' (fallback-route::'handler' unit)))
 
-(let log-request-route [request route] ->
+(let log-request-route \request route ->
   (info 'Request ' request::'method' ' ' request::'path' ' '
         route::'code' ' ' route::'message'))
 
-(let process-request [request] ->
+(let process-request \request ->
   (if (unit? request)
     (ret (build-fallback-response)))
 
   (let parsed (parse-request request))
 
   (let matched-routes
-    (filter [route] -> (== route::'path' parsed::'path') <>
+    (filter \route -> (== route::'path' parsed::'path') <>
             routes))
 
   (if (== (len matched-routes) 0)

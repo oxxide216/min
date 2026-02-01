@@ -5,7 +5,7 @@
 (let messages [])
 (let last-message-id 0)
 
-(let parse-message [raw-message] ->
+(let parse-message \raw-message ->
   (if (< (len raw-message) 1)
     (ret unit))
   (let sender-len raw-message::0)
@@ -27,7 +27,7 @@
     'text': text
   })
 
-(let send-message-handler [parsed-request] ->
+(let send-message-handler \parsed-request ->
   (if (!= parsed-request::'method' 'POST')
     (ret 'Wrong method, expected POST\n'))
 
@@ -41,7 +41,7 @@
     (ret 'Wrong message format\n'))
 
   (set last-message-id (+ last-message-id 1))
-  (set message::'id' last-message-id)
+  (set! message 'id' last-message-id)
 
   (set messages (+ messages message))
   (if (> (len messages) MAX-MESSAGES-COUNT)
@@ -50,7 +50,7 @@
 
   'Success\n')
 
-(let poll-messages-handler [parsed-request] ->
+(let poll-messages-handler \parsed-request ->
   (if (!= parsed-request::'method' 'POST')
     (ret 'Wrong method, expected POST\n'))
 
@@ -59,12 +59,12 @@
     (ret 'Wrong content, expected message id\n'))
 
   (let actual-messages (filter
-                         [message] ->
+                         \message ->
                            (> message::'id' prev-message-id) <>
                          messages))
 
   (let message-texts (map
-                       [message] ->
+                       \message ->
                          (join [message::'sender' message::'text'] ': ') <>
                        actual-messages))
 

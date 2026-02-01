@@ -6,7 +6,7 @@
 (let server (create-server PORT))
 (let clients (atom []))
 
-(while true
+(\->
   (let new-client (accept-connection server PORT))
   (if new-client
     (set clients (+ clients new-client)))
@@ -17,4 +17,5 @@
       (let response (process-request request))
       (send client response)))
 
-  (sleep 0.001))
+  (sleep 0.001)
+  (<->))
