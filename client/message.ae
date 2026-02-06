@@ -1,0 +1,25 @@
+(let encode-message \sender text ->
+  (join [(to-byte8 (len-bytes sender)) sender
+         (to-byte8 (len-bytes text)) text] ''))
+
+(let decode-message \message ->
+  (if (< (len message) 1)
+    (ret unit))
+  (let sender-len message::0)
+
+  (if (< (len message) (+ 2 sender-len))
+    (ret unit))
+  (let sender (get-range message 1 (+ 1 sender-len)))
+
+  (let text-len message::(+ 1 sender-len))
+
+  (if (< (len message) (+ 2 (+ sender-len text-len)))
+    (ret unit))
+  (let text (get-range message
+                       (+ 2 sender-len)
+                       (+ 2 (+ sender-len text-len))))
+
+  {
+    'sender': (to-str sender)
+    'text': (to-str text)
+  })

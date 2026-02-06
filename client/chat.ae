@@ -1,0 +1,68 @@
+(use 'std/web')
+
+(use 'message')
+
+(let input-field-name '.message-input')
+(let send-button-name '.send-message-button')
+
+(let last-message-id 0)
+(let name unit)
+
+(let send-message \text ->
+  (if (== (len text) 0)
+    (ret))
+
+  (if (unit? name)
+    (set name text)
+    (ret))
+
+  (let new-message-class-name (+ 'message' (to-str last-message-id)))
+  (let new-message-class (+ '.' new-message-class-name))
+  (append-clone '.messages-wrapper' '.owned-message' new-message-class-name)
+  (update-display new-message-class 'flex')
+  (update-text new-message-class text)
+
+  (let message-bytes (encode-message name text))
+
+  (fetch 'POST' 'min/api/send-message'
+         (to-str message-bytes)
+         \response -> (console-log (to-str response))))
+
+(let process-messages \messages ->
+  (if messages
+    (let parts (split (to-str messages) '\n'))
+    (let parsed (map \message -> (decode-message (to-bytes message)) <> parts))
+    (for message in parsed
+      (if (!= message::'sender' name)
+        (let new-message-class-name (+ 'message' (to-str last-message-id)))
+        (let new-message-class (+ '.' new-message-class-name))
+        (append-clone '.messages-wrapper' '.non-owned-message' new-message-class-name)
+        (update-display new-message-class 'flex')
+        (update-text new-message-class message::'text')))
+
+    (set last-message-id (+ last-message-id (len parsed)))))
+
+(on-key-down
+  input-field-name
+  \event ->
+    (if (== event::'key' 'Enter')
+      (send-message (get-value input-field-name))
+      (update-value input-field-name '')
+      (focus input-field-name)
+      true)
+    false)
+
+(on-click
+  send-button-name
+  \event ->
+    (send-message (get-value input-field-name))
+    (update-value input-field-name '')
+    (focus input-field-name)
+    true)
+
+(focus input-field-name)
+
+(main-loop 2 \->
+  (fetch 'POST' 'min/api/poll-messages'
+         (to-str (to-byte8 last-message-id))
+         process-messages))
