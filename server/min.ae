@@ -1,0 +1,42 @@
+(use 'std/str')
+
+(use 'config')
+
+(let messages [])
+(let last-message-id 0)
+
+(let send-message-handler \parsed-request ->
+  (if (!= parsed-request::'method' 'POST')
+    (ret 'Wrong method, expected POST\n'))
+
+  (set last-message-id (+ last-message-id 1))
+  (let message {
+    'id': last-message-id
+    'bytes': parsed-request::'content'
+  })
+
+  (set messages (+ messages message))
+  (if (> (len messages) MAX-MESSAGES-COUNT)
+    (let delta (- (len messages) MAX-MESSAGES-COUNT))
+    (set messages (get-range messages delta (len messages))))
+
+  'Success\n')
+
+(let poll-messages-handler \parsed-request ->
+  (if (!= parsed-request::'method' 'POST')
+    (ret 'Wrong method, expected POST\n'))
+
+  (let prev-message-id parsed-request::'content'::0)
+  (if (unit? prev-message-id)
+    (ret 'Wrong content, expected message id\n'))
+
+  (let actual-messages (filter
+                         \message ->
+                           (> message::'id' prev-message-id) <>
+                         messages))
+
+  (let messages-bytes (map
+                        \message -> message::'bytes' <>
+                        actual-messages))
+
+  (join messages-bytes '\n'))

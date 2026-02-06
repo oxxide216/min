@@ -36,7 +36,7 @@
 (let build-response \code message type content ->
   (join
     ['HTTP/1.1 ' code ' ' message '\r\n'
-     'Content-Type: ' type '; charset=utf-8\r\n'
+     'Content-Type: ' type '\r\n'
      'Content-Length: ' (to-str (len-bytes content)) '\r\n'
      '\r\n'
      content]
@@ -57,7 +57,7 @@
   (let parsed (parse-request request))
 
   (let matched-routes
-    (filter \route -> (== route::'path' parsed::'path') <>
+    (filter \route -> (route::'match-path' parsed::'path') <>
             routes))
 
   (if (== (len matched-routes) 0)
