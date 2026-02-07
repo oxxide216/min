@@ -38,7 +38,7 @@
         (let new-message-class (+ '.' new-message-class-name))
         (append-clone '.messages-wrapper' '.non-owned-message' new-message-class-name)
         (update-display new-message-class 'flex')
-        (update-text new-message-class message::'text')))
+        (update-text new-message-class (join [message::'sender' message::'text'] ': '))))
 
     (set last-message-id (+ last-message-id (len parsed)))))
 
